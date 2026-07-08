@@ -1,0 +1,2 @@
+﻿symbol,short_win,long_win,dev_win,hurst_config,signal_price_col,trade_price_col,return_mode,min_chunk,n_scales,min_segments,min_valid_scales,ann_ret,ann_vol,sharpe,max_drawdown,calmar,win_rate,profit_loss_ratio,turnover,final_nav,active_ratio
+JM,60,140,60,rs_default,close,open,open_to_open,8,8,2,3,0.11391866266702255,0.21794073638471378,0.5227047708324286,0.4273079679214188,0.26659615831917277,0.5007163323782235,1.1726344688467532,8.161269001982815,3.652696727044576,0.456708526107072

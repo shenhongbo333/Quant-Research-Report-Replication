@@ -1,0 +1,159 @@
+本报告使用的回测结果文件说明
+
+1. hurst_cta_train_global_fixed_search.zip
+
+这是最核心的样本内参数分析结果包。
+
+回测区间：
+2014-01-01 ~ 2024-06-06
+
+主要用途有三个：
+
+第一，查看 best 模式下的组合表现。
+
+对应文件：
+results/portfolio_summary.csv
+
+这里的 best 模式是指：
+每个品种先在参数网格中选择自己样本内表现最好的参数，然后再把各品种策略收益合成为全品种组合。
+
+这个结果可以说明策略在参数空间中存在有效区域，但不能作为最终策略表现，因为它存在逐品种样本内择参偏差。
+
+第二，做参数稳定性分析。
+
+对应文件：
+results/all_symbols_parameter_grid.csv
+
+这个文件包含所有品种、所有参数组合的回测结果，可以用来统计：
+每个品种参数 Sharpe 中位数；
+Sharpe > 0 的比例；
+Sharpe > 0.5 的比例；
+哪些品种参数稳定性较好；
+哪些品种只是在少数参数下表现好。
+
+第三，筛选全局固定参数。
+
+对应文件：
+results/global_fixed_top20.csv
+results/global_fixed_parameter_grid.csv
+results/global_fixed_best_summary.csv
+
+这里的全局固定参数是指：
+所有品种统一使用同一组 short / long / dev / hurst_config 参数，然后观察全品种组合表现。
+
+这个结果比 per-symbol best 更严谨，因为它没有让每个品种单独选择最优参数。本报告使用其中排名靠前的 Top1 和 Top2 参数做后续样本外验证。
+
+
+2. hurst_cta_train_ensemble_family.zip
+
+这是较宽参数族的 ensemble 平均信号结果包。
+
+回测区间：
+2014-01-01 ~ 2024-06-06
+
+参数族大致为：
+short = 20, 40, 60, 80, 100
+long = 140
+dev = 20, 40, 60, 80
+hurst = rs_fast, rs_default, rs_robust
+
+主要对应文件：
+results/portfolio_summary.csv
+
+这个结果用于检验导师建议的“多组参数平均信号”。
+
+ensemble 的逻辑是：
+同一个品种上，多组参数分别生成仓位信号；
+然后把这些仓位信号做平均；
+最后用平均后的仓位计算策略收益。
+
+这样做的目的不是追求样本内最优，而是降低单一参数选择带来的过拟合风险。
+
+这组结果显示：较宽参数族下，全品种组合仍有正收益，但收益和 Sharpe 明显低于 per-symbol best，说明参数平均后信号被稀释。
+
+
+3. hurst_cta_train_ensemble_family_narrow.zip
+
+这是缩窄参数族后的 ensemble 平均信号结果包。
+
+回测区间：
+2014-01-01 ~ 2024-06-06
+
+参数族大致为：
+short = 20, 40, 60, 80
+long = 140
+dev = 20, 40, 60
+hurst = rs_default, rs_robust
+
+主要对应文件：
+results/portfolio_summary.csv
+
+这组结果的目的，是在较宽参数族 ensemble 的基础上，进一步剔除部分表现较弱或不稳定的参数设置，看是否能提升平均信号质量。
+
+它回答的问题是：
+如果只保留相对更合理的一组参数族，多参数平均信号会不会更好？
+
+结果显示：缩窄参数族后，有色板块表现有所改善，但全品种组合整体提升有限。因此目前 ensemble 只能作为探索结果，暂时还不能替代固定参数样本外检验。
+
+
+4. hurst_cta_oos_fixed_top1.zip
+
+这是全局固定参数 Top1 的样本外验证结果包。
+
+完整回测区间：
+2014-01-01 ~ 2026-06-16
+
+样本外起点：
+2024-06-07
+
+使用参数：
+short = 20
+long = 120
+dev = 40
+hurst_config = rs_fast
+
+主要对应文件：
+results/fixed_portfolio_period_summary.csv
+
+这里使用的是 fixed 模式，也就是：
+所有品种都统一使用 Top1 这一组固定参数，不再重新选择参数。
+
+虽然完整回测从 2014 年开始，是为了保证 Hurst、均线、偏离窗口等指标有足够历史数据；真正评价样本外表现时，只看：
+out_of_sample: 2024-06-07 ~ 2026-06-16
+
+这个结果用于检验：
+样本内筛选出来的 Top1 固定参数，在 2024 年以后是否仍然有效。
+
+结果显示 Top1 在样本内表现尚可，但样本外全品种组合转弱。
+
+
+5. hurst_cta_oos_fixed_top2.zip
+
+这是全局固定参数 Top2 的样本外验证结果包。
+
+完整回测区间：
+2014-01-01 ~ 2026-06-16
+
+样本外起点：
+2024-06-07
+
+使用参数：
+short = 60
+long = 140
+dev = 60
+hurst_config = rs_default
+
+主要对应文件：
+results/fixed_portfolio_period_summary.csv
+
+这组和 Top1 的作用类似，也是固定参数样本外检验。
+
+选择 Top2 的原因是：
+Top2 的样本内 Sharpe 更高；
+参数设置 long=140, dev=60, rs_default 更接近之前观察到的相对稳健区域；
+相比 Top1，它不是只按 Calmar 排名挑出来的参数，而是更偏均衡。
+
+它用于回答：
+如果不用 Top1，而使用另一个更均衡的固定参数，样本外是否会更稳？
+
+结果显示 Top2 在样本外仍然转弱，但等权组合亏损小于 Top1，因此可以作为比 Top1 更稳一点的固定参数对照。
